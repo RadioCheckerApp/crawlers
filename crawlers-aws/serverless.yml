@@ -1,0 +1,15 @@
+service: crawlers-aws
+
+provider:
+  name: aws
+  runtime: go1.x
+  stage: dev
+  region: eu-central-1
+
+package:
+ exclude:
+   - ./**
+ include:
+   - ./bin/crawler-aws/**
+
+functions:
