@@ -10,4 +10,7 @@ install:
   - dep ensure
 
 script:
+  - go test -race ./crawler
+  - go test -race ./fetcher
+  - go test -race ./crawler-aws/*/
   - cd ./crawlers-aws/ && make
