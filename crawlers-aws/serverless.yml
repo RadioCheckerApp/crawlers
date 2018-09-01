@@ -5,11 +5,28 @@ provider:
   runtime: go1.x
   stage: dev
   region: eu-central-1
+  environment:
+    STATION_ID_HITRADIO_OE3: "hitradio-oe3"
+    RC_API_HOST: "0r9kilxs3j.execute-api.eu-central-1.amazonaws.com"
+    RC_API_STAGE: "dev"
+    RC_API_KEY: ${file(../secrets.yml):radiochecker.api-key}
+    TWITTER_CONSUMER_KEY: ${file(../secrets.yml):twitter.consumer-key}
+    TWITTER_CONSUMER_KEY_SECRET: ${file(../secrets.yml):twitter.consumer-key-secret}
+    TWITTER_OAUTH_ACCESS_TOKEN: ${file(../secrets.yml):twitter.oauth-access-token}
+    TWITTER_OAUTH_ACCESS_TOKEN_SECRET: ${file(../secrets.yml):twitter.oauth-access-token-secret}
 
 package:
  exclude:
    - ./**
  include:
-   - ./bin/crawler-aws/**
+   - ../bin/crawlers-aws/**
 
 functions:
+  crawler-hitradio-oe3:
+    handler: bin/crawlers-aws/hitradio-oe3
+    description: Crawler for radio station "Hitradio Ö3"
+    memorySize: 128
+    events:
+      - schedule:
+          rate: rate(1 hour)
+          enabled: true
