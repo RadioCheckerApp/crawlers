@@ -12,5 +12,5 @@ install:
 script:
   - go test -race ./crawler
   - go test -race ./fetcher
-  - go test -race ./crawler-aws/*/
+  - go test -race ./crawlers-aws/*/
   - cd ./crawlers-aws/ && make
