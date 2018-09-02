@@ -14,17 +14,17 @@ type MockTwitterAPI struct{}
 func (api MockTwitterAPI) GetUserTimeline(v url.Values) ([]anaconda.Tweet, error) {
 	tweets0 := []anaconda.Tweet{
 		{
-			Text:      "16:39: \"River\" von Eminem feat. Ed Sheeran",
+			FullText:  "16:39: \"River\" von Eminem feat. Ed Sheeran",
 			CreatedAt: "Mon Aug 26 09:39:00 -0700 2018",
 			IdStr:     "1",
 		},
 		{
-			Text:      "16:35: \"Last Friday Night\" von Katy Perry",
+			FullText:  "16:35: \"Last Friday Night\" von Katy Perry",
 			CreatedAt: "Mon Aug 26 09:35:00 -0700 2018",
 			IdStr:     "2",
 		},
 		{
-			Text:      "16:32: \"Hey Jessy\" von Simon Lewis",
+			FullText:  "16:32: \"Hey Jessy\" von Simon Lewis",
 			CreatedAt: "Mon Aug 26 09:32:00 -0700 2018",
 			IdStr:     "3",
 		},
@@ -32,17 +32,17 @@ func (api MockTwitterAPI) GetUserTimeline(v url.Values) ([]anaconda.Tweet, error
 
 	tweets1 := []anaconda.Tweet{
 		{
-			Text:      "16:32: \"Hey Jessy\" von Simon Lewis",
+			FullText:  "16:32: \"Hey Jessy\" von Simon Lewis",
 			CreatedAt: "Mon Aug 26 09:32:00 -0700 2018",
 			IdStr:     "3",
 		},
 		{
-			Text:      "16:25: \"Sign of the Times\" von Harry Styles",
+			FullText:  "16:25: \"Sign of the Times\" von Harry Styles",
 			CreatedAt: "Mon Aug 26 09:25:00 -0700 2018",
 			IdStr:     "4",
 		},
 		{
-			Text:      "16:22: \"Faded\" von Alan Walker",
+			FullText:  "16:22: \"Faded\" von Alan Walker",
 			CreatedAt: "Mon Aug 26 09:22:00 -0700 2018",
 			IdStr:     "5",
 		},

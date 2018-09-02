@@ -97,12 +97,12 @@ func extractTrackRecordFromTweet(tweet anaconda.Tweet) (model.TrackRecord, error
 		return model.TrackRecord{}, err
 	}
 
-	title, err := getTitleFromTweetText(tweet.Text)
+	title, err := getTitleFromTweetText(tweet.FullText)
 	if err != nil {
 		return model.TrackRecord{}, err
 	}
 
-	artist, err := getArtistFromTweetText(tweet.Text)
+	artist, err := getArtistFromTweetText(tweet.FullText)
 	if err != nil {
 		return model.TrackRecord{}, err
 	}
