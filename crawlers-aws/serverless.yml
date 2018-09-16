@@ -25,8 +25,8 @@ functions:
   crawler-hitradio-oe3:
     handler: bin/crawlers-aws/hitradio-oe3
     description: Crawler for radio station "Hitradio Ö3"
-    memorySize: 128
-    timeout: 8
+    memorySize: 512
+    timeout: 10
     events:
       - schedule:
           rate: rate(1 hour)
