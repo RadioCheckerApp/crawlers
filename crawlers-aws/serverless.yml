@@ -10,6 +10,7 @@ provider:
     RC_API_HOST: "0r9kilxs3j.execute-api.eu-central-1.amazonaws.com"
     RC_API_STAGE: "dev"
     RC_API_KEY: ${file(../secrets.yml):radiochecker.api-key}
+    RC_API_AUTHORIZATION: ${file(../secrets.yml):radiochecker.api-authorization}
     TWITTER_CONSUMER_KEY: ${file(../secrets.yml):twitter.consumer-key}
     TWITTER_CONSUMER_KEY_SECRET: ${file(../secrets.yml):twitter.consumer-key-secret}
     TWITTER_OAUTH_ACCESS_TOKEN: ${file(../secrets.yml):twitter.oauth-access-token}

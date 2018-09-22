@@ -19,9 +19,10 @@ type HomeBase interface {
 }
 
 type HomeBaseConnector struct {
-	APIHost  string
-	APIStage string
-	APIKey   string
+	APIHost          string
+	APIStage         string
+	APIKey           string
+	APIAuthorization string
 }
 
 func (api HomeBaseConnector) getLatestTrackRecord(stationId string) (model.TrackRecord, error) {
@@ -99,7 +100,11 @@ func (api HomeBaseConnector) sendHTTPRequest(method, url string, payload io.Read
 		return nil, err
 	}
 
-	req.Header.Set("X-API-KEY", api.APIKey)
+	if method == http.MethodPut {
+		req.Header.Set("Authorization", "Bearer "+api.APIAuthorization)
+	} else {
+		req.Header.Set("X-API-KEY", api.APIKey)
+	}
 
 	resp, err := client.Do(req)
 	if err != nil {
