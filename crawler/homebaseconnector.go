@@ -20,14 +20,13 @@ type HomeBase interface {
 
 type HomeBaseConnector struct {
 	APIHost          string
-	APIStage         string
 	APIKey           string
 	APIAuthorization string
 }
 
 func (api HomeBaseConnector) getLatestTrackRecord(stationId string) (model.TrackRecord, error) {
-	url := fmt.Sprintf("https://%s/%s/stations/%s/tracks?filter=latest",
-		api.APIHost, api.APIStage, stationId)
+	url := fmt.Sprintf("https://%s/stations/%s/tracks?filter=latest",
+		api.APIHost, stationId)
 
 	responseData, err := api.callEndpoint(http.MethodGet, url, nil)
 	if err != nil {
@@ -51,8 +50,8 @@ func (api HomeBaseConnector) getLatestTrackRecord(stationId string) (model.Track
 }
 
 func (api HomeBaseConnector) persistTrackRecord(trackRecord model.TrackRecord) error {
-	url := fmt.Sprintf("https://%s/%s/stations/%s/tracks/%d",
-		api.APIHost, api.APIStage, trackRecord.StationId, trackRecord.Timestamp)
+	url := fmt.Sprintf("https://%s/stations/%s/tracks/%d",
+		api.APIHost, trackRecord.StationId, trackRecord.Timestamp)
 
 	payload, err := json.Marshal(trackRecord.Track)
 	if err != nil {

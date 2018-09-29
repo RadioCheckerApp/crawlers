@@ -20,7 +20,6 @@ func Handler(event events.CloudWatchEvent) error {
 
 	stationId := os.Getenv("STATION_ID_HITRADIO_OE3")
 	rcAPIHost := os.Getenv("RC_API_HOST")
-	rcAPIStage := os.Getenv("RC_API_STAGE")
 	rcAPIKey := os.Getenv("RC_API_KEY")
 	rcAPIAuthorization := os.Getenv("RC_API_AUTHORIZATION")
 
@@ -37,7 +36,6 @@ func Handler(event events.CloudWatchEvent) error {
 
 	homebase := crawler.HomeBaseConnector{
 		rcAPIHost,
-		rcAPIStage,
 		rcAPIKey,
 		rcAPIAuthorization,
 	}

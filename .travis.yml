@@ -14,3 +14,15 @@ script:
   - go test -race ./fetcher
   - go test -race ./crawlers-aws/*/
   - cd ./crawlers-aws/ && make
+
+before_deploy:
+  - cd ..
+  - npm install -g serverless
+
+deploy:
+  # deploy to production if commit is tagged
+  skip_cleanup: true
+  provider: script
+  script: bash ./deploy.sh production
+  on:
+    tags: true

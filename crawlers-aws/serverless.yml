@@ -1,20 +1,20 @@
-service: crawlers-aws
+service: radiochecker-crawlers
 
 provider:
   name: aws
   runtime: go1.x
-  stage: dev
+  stage: ${opt:stage, 'dev'}
   region: eu-central-1
   environment:
     STATION_ID_HITRADIO_OE3: "hitradio-oe3"
-    RC_API_HOST: "0r9kilxs3j.execute-api.eu-central-1.amazonaws.com"
-    RC_API_STAGE: "dev"
-    RC_API_KEY: ${file(../secrets.yml):radiochecker.api-key}
-    RC_API_AUTHORIZATION: ${file(../secrets.yml):radiochecker.api-authorization}
-    TWITTER_CONSUMER_KEY: ${file(../secrets.yml):twitter.consumer-key}
-    TWITTER_CONSUMER_KEY_SECRET: ${file(../secrets.yml):twitter.consumer-key-secret}
-    TWITTER_OAUTH_ACCESS_TOKEN: ${file(../secrets.yml):twitter.oauth-access-token}
-    TWITTER_OAUTH_ACCESS_TOKEN_SECRET: ${file(../secrets.yml):twitter.oauth-access-token-secret}
+    # set Lambda environment variables based on those of the build server
+    RC_API_HOST: ${env:${self:provider.stage}_RC_API_HOST}
+    RC_API_KEY: ${env:${self:provider.stage}_RC_API_KEY}
+    RC_API_AUTHORIZATION: ${env:${self:provider.stage}_RC_API_AUTHORIZATION}
+    TWITTER_CONSUMER_KEY: ${env:${self:provider.stage}_TWITTER_CONSUMER_KEY}
+    TWITTER_CONSUMER_KEY_SECRET: ${env:${self:provider.stage}_TWITTER_CONSUMER_KEY_SECRET}
+    TWITTER_OAUTH_ACCESS_TOKEN: ${env:${self:provider.stage}_TWITTER_OAUTH_ACCESS_TOKEN}
+    TWITTER_OAUTH_ACCESS_TOKEN_SECRET: ${env:${self:provider.stage}_TWITTER_OAUTH_ACCESS_TOKEN_SECRET}
 
 package:
  exclude:
