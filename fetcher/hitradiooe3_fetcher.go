@@ -49,7 +49,7 @@ func buildInitialParams() url.Values {
 	return values
 }
 
-func (fetcher HitradioOE3Fetcher) Next() ([]model.TrackRecord, error) {
+func (fetcher HitradioOE3Fetcher) Next() ([]*model.TrackRecord, error) {
 	tweets, err := fetcher.twitterAPI.GetUserTimeline(fetcher.twitterAPIParams)
 	if err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func (fetcher HitradioOE3Fetcher) Next() ([]model.TrackRecord, error) {
 
 	log.Printf("INFO:    Fetched %d tweets from Twitter account `%s`.", len(tweets), twitterUserID)
 
-	var trackRecords []model.TrackRecord
+	var trackRecords []*model.TrackRecord
 
 	for _, tweet := range tweets {
 		if tweet.IdStr == fetcher.twitterAPIParams.Get("max_id") {
@@ -83,7 +83,7 @@ func (fetcher HitradioOE3Fetcher) Next() ([]model.TrackRecord, error) {
 	return trackRecords, nil
 }
 
-func extractTrackRecordFromTweet(tweet anaconda.Tweet) (model.TrackRecord, error) {
+func extractTrackRecordFromTweet(tweet anaconda.Tweet) (*model.TrackRecord, error) {
 	// Tweet format: `<airtime>: "<title>" von <artist>`
 	// For convenience (and also error resistance),
 	// the time when the tweet was created is used as airtime in the track record. In most cases,
@@ -94,20 +94,20 @@ func extractTrackRecordFromTweet(tweet anaconda.Tweet) (model.TrackRecord, error
 	// time in the text diverge too much (edge cases, i.e. midnight leaps, should be considered).
 	airtime, err := tweet.CreatedAtTime()
 	if err != nil {
-		return model.TrackRecord{}, err
+		return nil, err
 	}
 
 	title, err := getTitleFromTweetText(tweet.FullText)
 	if err != nil {
-		return model.TrackRecord{}, err
+		return nil, err
 	}
 
 	artist, err := getArtistFromTweetText(tweet.FullText)
 	if err != nil {
-		return model.TrackRecord{}, err
+		return nil, err
 	}
 
-	return model.TrackRecord{
+	return &model.TrackRecord{
 		radioStationId,
 		airtime.Unix(),
 		trackType,

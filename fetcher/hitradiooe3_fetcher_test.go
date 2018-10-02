@@ -82,7 +82,7 @@ func TestNewHitradioOE3Fetcher(t *testing.T) {
 
 var stationId = "hitradio-oe3"
 
-var expectedTrackRecords = []model.TrackRecord{
+var expectedTrackRecords = []*model.TrackRecord{
 	{stationId, 1535301540, "track", model.Track{"Eminem feat. Ed Sheeran", "River"}},
 	{stationId, 1535301300, "track", model.Track{"Katy Perry", "Last Friday Night"}},
 	{stationId, 1535301120, "track", model.Track{"Simon Lewis", "Hey Jessy"}},
@@ -90,7 +90,7 @@ var expectedTrackRecords = []model.TrackRecord{
 
 type FetcherTest struct {
 	fetcher              HitradioOE3Fetcher
-	expectedTrackRecords []model.TrackRecord
+	expectedTrackRecords []*model.TrackRecord
 	expectedMaxID        string
 	expectedErr          bool
 }
@@ -105,7 +105,7 @@ func TestHitradioOE3Fetcher_Next_Basic(t *testing.T) {
 		},
 		{
 			HitradioOE3Fetcher{MockTwitterAPI{}, url.Values{"error": []string{"ok"}}},
-			[]model.TrackRecord{},
+			nil,
 			"X",
 			true,
 		},
@@ -119,7 +119,7 @@ func TestHitradioOE3Fetcher_Next_Basic(t *testing.T) {
 func TestHitradioOE3Fetcher_Next_Loop(t *testing.T) {
 	test := FetcherTest{
 		HitradioOE3Fetcher{MockTwitterAPI{}, url.Values{}},
-		[]model.TrackRecord{
+		[]*model.TrackRecord{
 			{stationId, 1535300700, "track", model.Track{"Harry Styles", "Sign of the Times"}},
 			{stationId, 1535300520, "track", model.Track{"Alan Walker", "Faded"}},
 		},
