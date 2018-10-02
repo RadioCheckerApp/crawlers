@@ -11,8 +11,8 @@ import (
 
 type MockHomeBaseSuccess struct{}
 
-func (api MockHomeBaseSuccess) getLatestTrackRecord(stationId string) (model.TrackRecord, error) {
-	return model.TrackRecord{
+func (api MockHomeBaseSuccess) getLatestTrackRecord(stationId string) (*model.TrackRecord, error) {
+	return &model.TrackRecord{
 		"station-a",
 		1234567890,
 		"track",
@@ -20,7 +20,7 @@ func (api MockHomeBaseSuccess) getLatestTrackRecord(stationId string) (model.Tra
 	}, nil
 }
 
-func (api MockHomeBaseSuccess) persistTrackRecord(trackRecord model.TrackRecord) error {
+func (api MockHomeBaseSuccess) persistTrackRecord(trackRecord *model.TrackRecord) error {
 	if trackRecord.StationId == "fail" {
 		return errors.New("just a test")
 	}
@@ -29,14 +29,14 @@ func (api MockHomeBaseSuccess) persistTrackRecord(trackRecord model.TrackRecord)
 
 type MockHomeBaseFail struct{}
 
-func (api MockHomeBaseFail) getLatestTrackRecord(stationId string) (model.TrackRecord, error) {
+func (api MockHomeBaseFail) getLatestTrackRecord(stationId string) (*model.TrackRecord, error) {
 	if stationId == "fail gracefully" {
-		return model.TrackRecord{}, errors.New("request did not return any data")
+		return nil, errors.New("request did not return any data")
 	}
-	return model.TrackRecord{}, errors.New("")
+	return nil, errors.New("")
 }
 
-func (api MockHomeBaseFail) persistTrackRecord(trackRecord model.TrackRecord) error {
+func (api MockHomeBaseFail) persistTrackRecord(trackRecord *model.TrackRecord) error {
 	return errors.New("")
 }
 
@@ -90,18 +90,26 @@ func TestNewCrawler_Fail(t *testing.T) {
 	}
 }
 
-var trackRecordBatch0 = []model.TrackRecord{
+func TestCrawler_Crawl_QuitIfUpToDate(t *testing.T) {
+	crawler := Crawler{
+		homeBase:                   MockHomeBaseSuccess{},
+		latestTrackRecordTimestamp: time.Now().AddDate(0, 0, 1).Unix(),
+	}
+	crawler.Crawl()
+}
+
+var trackRecordBatch0 = []*model.TrackRecord{
 	{"station-a", 1535301540, "track", model.Track{"Eminem feat. Ed Sheeran", "River"}},
 	{"station-a", 1535301300, "track", model.Track{"Katy Perry", "Last Friday Night"}},
 	{"station-a", 1535301120, "track", model.Track{"Simon Lewis", "Hey Jessy"}},
 }
 
-var trackRecordBatch1 = []model.TrackRecord{
+var trackRecordBatch1 = []*model.TrackRecord{
 	{"station-a", 1535301540, "track", model.Track{"Eminem feat. Ed Sheeran", "River"}},
 	{"station-a", 1234567890, "track", model.Track{"Katy Perry", "Last Friday Night"}},
 }
 
-var trackRecordBatch2 = []model.TrackRecord{
+var trackRecordBatch2 = []*model.TrackRecord{
 	{"station-a", 1535301540, "track", model.Track{"Eminem feat. Ed Sheeran", "River"}},
 	{"fail", 1535301300, "fail", model.Track{"fail", "fail"}},
 	{"station-a", 1535301120, "track", model.Track{"Simon Lewis", "Hey Jessy"}},
@@ -109,7 +117,7 @@ var trackRecordBatch2 = []model.TrackRecord{
 
 func TestCrawler_batchPersistTrackRecords(t *testing.T) {
 	var tests = []struct {
-		trackRecords                []model.TrackRecord
+		trackRecords                []*model.TrackRecord
 		expectedInsertedTracksCount int
 		expectedUpToDate            bool
 	}{

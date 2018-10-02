@@ -47,6 +47,11 @@ func currentDayBeginTimestamp() int64 {
 }
 
 func (crawler Crawler) Crawl() {
+	if time.Now().Unix() <= crawler.latestTrackRecordTimestamp {
+		log.Println("INFO:    Crawler quit since latest TrackRecord is newer than current time.")
+		return
+	}
+
 	overallPersistedCounter := 0
 	upToDate := false
 	var fetchErr error = nil
@@ -66,7 +71,7 @@ func (crawler Crawler) Crawl() {
 	}
 
 	if upToDate {
-		log.Printf("INFO:    Crawler successfully updated records.")
+		log.Println("INFO:    Crawler successfully updated records.")
 	}
 
 	log.Printf("INFO:    %d TrackRecords persisted.", overallPersistedCounter)
