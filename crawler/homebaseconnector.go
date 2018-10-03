@@ -14,8 +14,8 @@ import (
 )
 
 type HomeBase interface {
-	getLatestTrackRecord(stationId string) (model.TrackRecord, error)
-	persistTrackRecord(trackRecord model.TrackRecord) error
+	getLatestTrackRecord(stationId string) (*model.TrackRecord, error)
+	persistTrackRecord(trackRecord *model.TrackRecord) error
 }
 
 type HomeBaseConnector struct {
@@ -24,7 +24,7 @@ type HomeBaseConnector struct {
 	APIAuthorization string
 }
 
-func (api HomeBaseConnector) getLatestTrackRecord(stationId string) (model.TrackRecord, error) {
+func (api HomeBaseConnector) getLatestTrackRecord(stationId string) (*model.TrackRecord, error) {
 	url := fmt.Sprintf("https://%s/stations/%s/tracks?filter=latest",
 		api.APIHost, stationId)
 
@@ -32,7 +32,7 @@ func (api HomeBaseConnector) getLatestTrackRecord(stationId string) (model.Track
 	if err != nil {
 		log.Printf("WARNING: Unable to get latest TrackRecord from endpoint `%s %s`. "+
 			"Message: `%s`.", http.MethodGet, url, err.Error())
-		return model.TrackRecord{}, err
+		return nil, err
 	}
 
 	responseDataMap := responseData.(map[string]interface{})
@@ -43,13 +43,13 @@ func (api HomeBaseConnector) getLatestTrackRecord(stationId string) (model.Track
 	if err != nil {
 		log.Printf("ERROR:   Unable to unmarshal JSON object into TrackRecord. Message: `%s`.",
 			err.Error())
-		return model.TrackRecord{}, err
+		return nil, err
 	}
 
-	return latestTrackRecord, nil
+	return &latestTrackRecord, nil
 }
 
-func (api HomeBaseConnector) persistTrackRecord(trackRecord model.TrackRecord) error {
+func (api HomeBaseConnector) persistTrackRecord(trackRecord *model.TrackRecord) error {
 	url := fmt.Sprintf("https://%s/stations/%s/tracks/%d",
 		api.APIHost, trackRecord.StationId, trackRecord.Timestamp)
 

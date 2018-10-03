@@ -77,7 +77,7 @@ func (crawler Crawler) Crawl() {
 	log.Printf("INFO:    %d TrackRecords persisted.", overallPersistedCounter)
 }
 
-func (crawler Crawler) batchPersistTrackRecords(trackRecords []model.TrackRecord) (int, bool) {
+func (crawler Crawler) batchPersistTrackRecords(trackRecords []*model.TrackRecord) (int, bool) {
 	insertedTracksCounter := 0
 	for _, trackRecord := range trackRecords {
 		if trackRecord.Timestamp <= crawler.latestTrackRecordTimestamp {
