@@ -7,6 +7,7 @@ provider:
   region: eu-central-1
   environment:
     STATION_ID_HITRADIO_OE3: "hitradio-oe3"
+    STATION_ID_KRONEHIT: "kronehit"
     # set Lambda environment variables based on those of the build server
     RC_API_HOST: ${env:${self:provider.stage}_RC_API_HOST}
     RC_API_KEY: ${env:${self:provider.stage}_RC_API_KEY}
@@ -28,6 +29,15 @@ functions:
     description: Crawler for radio station "Hitradio Ö3"
     memorySize: 512
     timeout: 10
+    events:
+      - schedule:
+          rate: rate(1 hour)
+          enabled: true
+  crawler-kronehit:
+    handler: bin/crawlers-aws/kronehit
+    description: Crawler for radio station "Kronehit"
+    memorySize: 1024
+    timeout: 20
     events:
       - schedule:
           rate: rate(1 hour)
