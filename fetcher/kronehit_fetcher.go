@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/RadioCheckerApp/api/model"
 	"log"
-	"math/rand"
 	"net/http"
 	"sort"
 	"strconv"
@@ -149,7 +148,8 @@ type KronehitFetcher struct {
 
 func NewKronehitFetcher() KronehitFetcher {
 	kronehitAPI := NewKronehitAPIImplementation(requestTimeout)
-	nextFetchTime := randomizedInitialFetchTime()
+	// ALWAYS crawl in the past to avoid inconsistent data
+	nextFetchTime := time.Now().Add(-kronehitTimeCorrection).In(getLocation())
 	log.Printf("INFO:    Set nextFetchTime to %s.", nextFetchTime.Format("2006-01-02 15:04:05"))
 	return KronehitFetcher{kronehitAPI, nextFetchTime, 0}
 }
@@ -169,8 +169,8 @@ func (fetcher *KronehitFetcher) Next() ([]*model.TrackRecord, error) {
 	log.Printf("INFO:    Fetched %d items from Kronehit.", len(items.Items))
 
 	trackRecords := items.toTrackRecords(&fetcher.nextFetchTime, func(record *model.TrackRecord) bool {
-		return !fetcher.isFirstFetch() &&
-			record.Timestamp >= fetcher.nextFetchTime.Add(kronehitTimeCorrection).Unix()
+		// always skip records that are younger than the last fetch time
+		return record.Timestamp >= fetcher.nextFetchTime.Add(kronehitTimeCorrection).Unix()
 	})
 
 	if len(trackRecords) == 0 {
@@ -195,14 +195,6 @@ func (fetcher *KronehitFetcher) Next() ([]*model.TrackRecord, error) {
 
 func (fetcher *KronehitFetcher) isFirstFetch() bool {
 	return fetcher.fetchCounter == 0
-}
-
-// randomizedInitialFetchTime generates a random time.Time within the last 10 minutes.
-// This behaviour should help to disguise the fetcher as real user/browser.
-func randomizedInitialFetchTime() time.Time {
-	const interval = 600 // 10 minutes
-	randomizedInterval := rand.Int63n(interval)
-	return time.Unix(time.Now().Unix()+randomizedInterval, 0).In(getLocation())
 }
 
 // randomizedInitialFetchTime generates a random user agent that is sent by common browsers.
