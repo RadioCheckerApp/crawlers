@@ -56,10 +56,11 @@ type KronehitItems struct {
 func (items *KronehitItems) toTrackRecords(fetchTime *time.Time,
 	skip func(record *model.TrackRecord) bool) []*model.TrackRecord {
 	spanningOverMidnight := items.spanOverMidnight()
+	fetchedOverMidnight := items.fetchedOverMidnight(fetchTime)
 	var trackRecords []*model.TrackRecord
 	for _, item := range items.Items {
 		playDate := *fetchTime
-		if spanningOverMidnight {
+		if spanningOverMidnight || fetchedOverMidnight {
 			playDate = sanitizedPlayDate(&playDate, item.Hour())
 		}
 		trackRecord, err := item.toTrackRecord(&playDate)
@@ -84,6 +85,10 @@ func (items *KronehitItems) spanOverMidnight() bool {
 		return false
 	}
 	return items.Items[0].Hour() > items.Items[len(items.Items)-1].Hour()
+}
+
+func (items *KronehitItems) fetchedOverMidnight(fetchTime *time.Time) bool {
+	return items.Items[0].Hour() > fetchTime.Hour()
 }
 
 func sanitizedPlayDate(fetchTime *time.Time, itemHour int) time.Time {

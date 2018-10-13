@@ -85,12 +85,12 @@ func (api MockKronehitAPI) GetItems(date time.Time) (KronehitItems, error) {
 	return items0, nil
 }
 
-var mockKronehitAPIMidnightLoopCounter = 0
+type MockKronehitAPIMidnightLoop struct {
+	loopCounter int
+}
 
-type MockKronehitAPIMidnightLoop struct{}
-
-func (api MockKronehitAPIMidnightLoop) GetItems(date time.Time) (KronehitItems, error) {
-	defer func() { mockKronehitAPIMidnightLoopCounter++ }()
+func (api *MockKronehitAPIMidnightLoop) GetItems(date time.Time) (KronehitItems, error) {
+	defer func() { api.loopCounter++ }()
 
 	item0 := KronehitItems{
 		[]KronehitItem{
@@ -126,10 +126,10 @@ func (api MockKronehitAPIMidnightLoop) GetItems(date time.Time) (KronehitItems, 
 		},
 	}
 
-	if mockKronehitAPIMidnightLoopCounter == 0 {
+	if api.loopCounter == 0 {
 		return item0, nil
 	}
-	if mockKronehitAPIMidnightLoopCounter == 1 {
+	if api.loopCounter == 1 {
 		return item1, nil
 	}
 	return item2, nil
@@ -210,7 +210,10 @@ func TestKronehitFetcher_Next_Midnight_Weekend(t *testing.T) {
 		location)
 	nextFetchTimeBeforeMidnight, _ := time.ParseInLocation(timeFormatStr, "2018-09-28 23:59:59",
 		location)
+	nextFetchTimeNoMidnightSpan, _ := time.ParseInLocation(timeFormatStr, "2018-10-11 02:00:00",
+		location)
 	expectedNextFetchTime, _ := time.ParseInLocation(timeFormatStr, "2018-09-28 20:47:29", location)
+	expectedNextFetchTimeNoMidnightSpan, _ := time.ParseInLocation(timeFormatStr, "2018-10-10 23:28:05", location)
 	tests := []KronehitFetcherTest{
 		{
 			KronehitFetcher{MockKronehitAPI{}, nextFetchTimeAfterMidnight.Add(-kronehitTimeCorrection), 0},
@@ -222,6 +225,12 @@ func TestKronehitFetcher_Next_Midnight_Weekend(t *testing.T) {
 			KronehitFetcher{MockKronehitAPI{}, nextFetchTimeBeforeMidnight.Add(-kronehitTimeCorrection), 0},
 			kronehitExpectedTrackRecords2[3:],
 			expectedNextFetchTime,
+			false,
+		},
+		{
+			KronehitFetcher{&MockKronehitAPIMidnightLoop{2}, nextFetchTimeNoMidnightSpan.Add(-kronehitTimeCorrection), 0},
+			kronehitExpectedTrackRecordsNextMidnightLoop[7:],
+			expectedNextFetchTimeNoMidnightSpan,
 			false,
 		},
 	}
@@ -285,7 +294,7 @@ var kronehitExpectedTrackRecordsNextMidnightLoop = []*model.TrackRecord{
 func TestKronehitFetcher_Next_Midnight_Loop(t *testing.T) {
 	nextFetchTime, _ := time.ParseInLocation(timeFormatStr, "2018-10-11 00:20:00", location)
 	nextFetchTime = nextFetchTime.Add(-kronehitTimeCorrection)
-	fetcher := KronehitFetcher{MockKronehitAPIMidnightLoop{}, nextFetchTime, 0}
+	fetcher := KronehitFetcher{&MockKronehitAPIMidnightLoop{0}, nextFetchTime, 0}
 
 	var results []*model.TrackRecord
 	for i := 0; i < 3; i++ {
