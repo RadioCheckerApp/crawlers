@@ -39,6 +39,7 @@ func (item *KronehitItem) toTrackRecord(playDate *time.Time) (*model.TrackRecord
 	if err != nil {
 		log.Printf("ERROR:   Unable to parse `%s` to time. Message: `%s`.",
 			dateTimeStr, err.Error())
+		return nil, err
 	}
 
 	return &model.TrackRecord{
