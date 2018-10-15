@@ -46,7 +46,7 @@ func currentDayBeginTimestamp() int64 {
 	return todayMidnight.AddDate(0, 0, -1).Unix()
 }
 
-func (crawler Crawler) Crawl() {
+func (crawler *Crawler) Crawl() {
 	if time.Now().Unix() <= crawler.latestTrackRecordTimestamp {
 		log.Println("INFO:    Crawler quit since latest TrackRecord is newer than current time.")
 		return
@@ -61,6 +61,7 @@ func (crawler Crawler) Crawl() {
 			fetchErr = err
 			break
 		}
+		trackRecords = crawler.filterDuplicates(trackRecords)
 		persistedCounter, status := crawler.batchPersistTrackRecords(trackRecords)
 		upToDate = status
 		overallPersistedCounter += persistedCounter
@@ -68,6 +69,7 @@ func (crawler Crawler) Crawl() {
 
 	if fetchErr != nil {
 		log.Printf("WARNING: Crawler finished with error. Message: `%s`.", fetchErr.Error())
+		// TODO: return error here
 	}
 
 	if upToDate {
@@ -77,7 +79,7 @@ func (crawler Crawler) Crawl() {
 	log.Printf("INFO:    %d TrackRecords persisted.", overallPersistedCounter)
 }
 
-func (crawler Crawler) batchPersistTrackRecords(trackRecords []*model.TrackRecord) (int, bool) {
+func (crawler *Crawler) batchPersistTrackRecords(trackRecords []*model.TrackRecord) (int, bool) {
 	insertedTracksCounter := 0
 	for _, trackRecord := range trackRecords {
 		if trackRecord.Timestamp <= crawler.latestTrackRecordTimestamp {
@@ -92,4 +94,38 @@ func (crawler Crawler) batchPersistTrackRecords(trackRecords []*model.TrackRecor
 		insertedTracksCounter++
 	}
 	return insertedTracksCounter, false
+}
+
+func (crawler *Crawler) filterDuplicates(records []*model.TrackRecord) []*model.TrackRecord {
+	if len(records) < 2 {
+		return records
+	}
+
+	filteredRecords := []*model.TrackRecord{records[0]}
+	for i := 1; i < len(records) && records[i].Timestamp >= crawler.latestTrackRecordTimestamp; i++ {
+		prevRecord := filteredRecords[len(filteredRecords)-1]
+		currRecord := records[i]
+		if areTrackRecordsEqual(prevRecord, currRecord) {
+			log.Printf("WARNING: Crawler skipping duplicated track record: `%q`.", currRecord)
+			continue
+		}
+		filteredRecords = append(filteredRecords, currRecord)
+	}
+	return filteredRecords
+}
+
+func areTrackRecordsEqual(a, b *model.TrackRecord) bool {
+	// TrackRecords are equal if they have the same artist & title
+	// and have a matching timestamp (±5 minutes)
+	return a.Title == b.Title &&
+		a.Artist == b.Artist &&
+		abs(a.Timestamp-b.Timestamp) < 300
+}
+
+func abs(n int64) int64 {
+	// a fast absolute value function for int64
+	// without the casting overhead required when by the stdlib
+	// http://cavaliercoder.com/blog/optimized-abs-for-int64-in-go.html
+	y := n >> 63
+	return (n ^ y) - y
 }

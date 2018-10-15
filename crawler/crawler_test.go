@@ -140,3 +140,80 @@ func TestCrawler_batchPersistTrackRecords(t *testing.T) {
 		}
 	}
 }
+
+var duplicateTrackRecords0 = []*model.TrackRecord{
+	{"station-a", 1535301540, "track", model.Track{"Eminem feat. Ed Sheeran", "River"}},
+	{"station-a", 1535301300, "track", model.Track{"Katy Perry", "Last Friday Night"}},
+	{"station-a", 1535301120, "track", model.Track{"Simon Lewis", "Hey Jessy"}},
+}
+
+var duplicateTrackRecords1 = []*model.TrackRecord{
+	{"station-a", 1535301540, "track", model.Track{"Eminem feat. Ed Sheeran", "River"}},
+	{"station-a", 1535301640, "track", model.Track{"Eminem feat. Ed Sheeran", "River"}},
+	{"station-a", 1535301300, "track", model.Track{"Katy Perry", "Last Friday Night"}},
+	{"station-a", 1535301120, "track", model.Track{"Simon Lewis", "Hey Jessy"}},
+}
+
+var duplicateTrackRecords2 = []*model.TrackRecord{
+	{"station-a", 1535301540, "track", model.Track{"Eminem feat. Ed Sheeran", "River"}},
+	{"station-a", 1535301300, "track", model.Track{"Katy Perry", "Last Friday Night"}},
+	{"station-a", 1535301001, "track", model.Track{"Katy Perry", "Last Friday Night"}},
+	{"station-a", 1535301120, "track", model.Track{"Simon Lewis", "Hey Jessy"}},
+}
+
+var duplicateTrackRecords3 = []*model.TrackRecord{
+	{"station-a", 1535301540, "track", model.Track{"Eminem feat. Ed Sheeran", "River"}},
+	{"station-a", 1535301300, "track", model.Track{"Katy Perry", "Last Friday Night"}},
+	{"station-a", 1535301120, "track", model.Track{"Simon Lewis", "Hey Jessy"}},
+	{"station-a", 1535301320, "track", model.Track{"Simon Lewis", "Hey Jessy"}},
+}
+
+var duplicateTrackRecords4 = []*model.TrackRecord{
+	{"station-a", 1535301540, "track", model.Track{"Eminem feat. Ed Sheeran", "River"}},
+	{"station-a", 1535301444, "track", model.Track{"Eminem feat. Ed Sheeran", "River"}},
+	{"station-a", 1535301300, "track", model.Track{"Katy Perry", "Last Friday Night"}},
+	{"station-a", 1535301120, "track", model.Track{"Simon Lewis", "Hey Jessy"}},
+	{"station-a", 1535301000, "track", model.Track{"Simon Lewis", "Hey Jessy"}},
+	// a track that is older than the latestTrackRecord and therefore should cause the loop to exit
+	{"station-a", 1, "track", model.Track{"Old Test", "Track"}},
+	{"station-a", 12345, "track", model.Track{"Ignored", "Track"}},
+}
+
+func TestCrawler_filterDuplicate(t *testing.T) {
+	var tests = [][]*model.TrackRecord{
+		duplicateTrackRecords0,
+		duplicateTrackRecords1,
+		duplicateTrackRecords2,
+		duplicateTrackRecords3,
+		duplicateTrackRecords4,
+	}
+
+	crawler := Crawler{latestTrackRecordTimestamp: 1234}
+	for _, test := range tests {
+		result := crawler.filterDuplicates(test)
+		if !reflect.DeepEqual(result, duplicateTrackRecords0) {
+			t.Errorf("filterDuplicates(%q): got\n%q, expected\n%q", test, result, duplicateTrackRecords0)
+		}
+	}
+}
+
+func TestAbs(t *testing.T) {
+	var tests = map[int64]int64{
+		0:     0,
+		-1:    1,
+		1:     1,
+		-100:  100,
+		100:   100,
+		-1000: 1000,
+		1000:  1000,
+		-123:  123,
+		123:   123,
+	}
+
+	for testValue, expected := range tests {
+		result := abs(testValue)
+		if result != expected {
+			t.Errorf("abs(%d): expected `%d`, got `%d`", testValue, expected, result)
+		}
+	}
+}
