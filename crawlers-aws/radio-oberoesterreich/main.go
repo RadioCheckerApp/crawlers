@@ -37,9 +37,7 @@ func Handler(event events.CloudWatchEvent) error {
 		return err
 	}
 
-	ooeCrawler.Crawl()
-
-	return nil
+	return ooeCrawler.Crawl()
 }
 
 func main() {

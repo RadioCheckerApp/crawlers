@@ -46,10 +46,10 @@ func currentDayBeginTimestamp() int64 {
 	return todayMidnight.AddDate(0, 0, -1).Unix()
 }
 
-func (crawler *Crawler) Crawl() {
+func (crawler *Crawler) Crawl() error {
 	if time.Now().Unix() <= crawler.latestTrackRecordTimestamp {
 		log.Println("INFO:    Crawler quit since latest TrackRecord is newer than current time.")
-		return
+		return nil
 	}
 
 	overallPersistedCounter := 0
@@ -67,16 +67,20 @@ func (crawler *Crawler) Crawl() {
 		overallPersistedCounter += persistedCounter
 	}
 
+	log.Printf("INFO:    %d TrackRecords persisted.", overallPersistedCounter)
+
 	if fetchErr != nil {
 		log.Printf("WARNING: Crawler finished with error. Message: `%s`.", fetchErr.Error())
-		// TODO: return error here
+		return fetchErr
 	}
 
-	if upToDate {
-		log.Println("INFO:    Crawler successfully updated records.")
+	if !upToDate {
+		log.Println("WARNING: Crawler failed to update records.")
+		return errors.New("crawler failed to update records")
 	}
 
-	log.Printf("INFO:    %d TrackRecords persisted.", overallPersistedCounter)
+	log.Println("INFO:    Crawler successfully updated records.")
+	return nil
 }
 
 func (crawler *Crawler) batchPersistTrackRecords(trackRecords []*model.TrackRecord) (int, bool) {

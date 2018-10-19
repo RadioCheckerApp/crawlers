@@ -33,9 +33,7 @@ func Handler(event events.CloudWatchEvent) error {
 		return err
 	}
 
-	kronehitCrawler.Crawl()
-
-	return nil
+	return kronehitCrawler.Crawl()
 }
 
 func main() {
