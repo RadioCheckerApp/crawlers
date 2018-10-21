@@ -8,6 +8,11 @@ import (
 	"time"
 )
 
+const (
+	timeDeltaLatestTrackRecord = 10
+	timeDeltaEqualTrackRecords = 300
+)
+
 type Crawler struct {
 	stationId                  string
 	fetcher                    fetcher.Fetcher
@@ -89,6 +94,12 @@ func (crawler *Crawler) batchPersistTrackRecords(trackRecords []*model.TrackReco
 		if trackRecord.Timestamp <= crawler.latestTrackRecordTimestamp {
 			return insertedTracksCounter, true
 		}
+		if trackRecord.Timestamp-crawler.latestTrackRecordTimestamp <= timeDeltaLatestTrackRecord {
+			log.Printf("WARNING: TrackRecord of batch has critical proximity to "+
+				"lastestTreckRecordTimestamp (%d), but is not equal. Finishing with success. "+
+				"TrackRecord: `%q`", crawler.latestTrackRecordTimestamp, trackRecord)
+			return insertedTracksCounter, true
+		}
 		err := crawler.homeBase.persistTrackRecord(trackRecord)
 		if err != nil {
 			log.Printf("ERROR:   Unable to persist TrackRecord: `%q`. Message: `%s`.",
@@ -123,7 +134,7 @@ func areTrackRecordsEqual(a, b *model.TrackRecord) bool {
 	// and have a matching timestamp (±5 minutes)
 	return a.Title == b.Title &&
 		a.Artist == b.Artist &&
-		abs(a.Timestamp-b.Timestamp) < 300
+		abs(a.Timestamp-b.Timestamp) < timeDeltaEqualTrackRecords
 }
 
 func abs(n int64) int64 {

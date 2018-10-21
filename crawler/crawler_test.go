@@ -115,6 +115,13 @@ var trackRecordBatch2 = []*model.TrackRecord{
 	{"station-a", 1535301120, "track", model.Track{"Simon Lewis", "Hey Jessy"}},
 }
 
+var trackRecordBatch3 = []*model.TrackRecord{
+	{"station-a", 1535301540, "track", model.Track{"Eminem feat. Ed Sheeran", "River"}},
+	{"station-a", 1535301000, "track", model.Track{"Katy Perry", "Last Friday Night"}},
+	// a track with critical proximity to the latestTrackRecord, therefore ignore it and finish successfully
+	{"station-a", 1234567900, "track", model.Track{"Skipped", "Track"}},
+}
+
 func TestCrawler_batchPersistTrackRecords(t *testing.T) {
 	var tests = []struct {
 		trackRecords                []*model.TrackRecord
@@ -124,6 +131,7 @@ func TestCrawler_batchPersistTrackRecords(t *testing.T) {
 		{trackRecordBatch0, 3, false},
 		{trackRecordBatch1, 1, true},
 		{trackRecordBatch2, 2, false},
+		{trackRecordBatch3, 2, true},
 	}
 	crawler := Crawler{latestTrackRecordTimestamp: 1234567890, homeBase: MockHomeBaseSuccess{}}
 
@@ -179,7 +187,7 @@ var duplicateTrackRecords4 = []*model.TrackRecord{
 	{"station-a", 12345, "track", model.Track{"Ignored", "Track"}},
 }
 
-func TestCrawler_filterDuplicate(t *testing.T) {
+func TestCrawler_filterDuplicates(t *testing.T) {
 	var tests = [][]*model.TrackRecord{
 		duplicateTrackRecords0,
 		duplicateTrackRecords1,
