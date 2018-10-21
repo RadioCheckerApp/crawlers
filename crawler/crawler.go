@@ -117,7 +117,8 @@ func (crawler *Crawler) filterDuplicates(records []*model.TrackRecord) []*model.
 	}
 
 	filteredRecords := []*model.TrackRecord{records[0]}
-	for i := 1; i < len(records) && records[i].Timestamp >= crawler.latestTrackRecordTimestamp; i++ {
+	for i := 1; i < len(records) && records[i].Timestamp >= crawler.
+		latestTrackRecordTimestamp-timeDeltaLatestTrackRecord; i++ {
 		prevRecord := filteredRecords[len(filteredRecords)-1]
 		currRecord := records[i]
 		if areTrackRecordsEqual(prevRecord, currRecord) {
