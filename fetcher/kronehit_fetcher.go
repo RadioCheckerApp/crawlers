@@ -35,7 +35,7 @@ func (item *KronehitItem) Hour() int {
 
 func (item *KronehitItem) toTrackRecord(playDate *time.Time) (*model.TrackRecord, error) {
 	dateTimeStr := fmt.Sprintf("%s %s", playDate.Format("2006-01-02"), item.PlayTime)
-	dateTime, err := time.ParseInLocation("2006-01-02 15:04:05", dateTimeStr, getLocation())
+	dateTime, err := time.ParseInLocation("2006-01-02 15:04", dateTimeStr, getLocation())
 	if err != nil {
 		log.Printf("ERROR:   Unable to parse `%s` to time. Message: `%s`.",
 			dateTimeStr, err.Error())
